@@ -1,211 +1,212 @@
-export default function CellLearningPlatform() {
-  const parts = [
-    {
-      name: '細胞膜',
-      emoji: '🫧',
-      color: 'bg-blue-100',
-      function: '控制物質進出、保護細胞',
-      memory: '像細胞的大門，決定誰能進出。'
-    },
-    {
-      name: '細胞質',
-      emoji: '🧪',
-      color: 'bg-yellow-100',
-      function: '化學反應進行的地方',
-      memory: '像工廠的工作區。'
-    },
-    {
-      name: '細胞核',
-      emoji: '🧠',
-      color: 'bg-pink-100',
-      function: '控制細胞活動、儲存DNA',
-      memory: '像細胞的大腦。'
-    },
-    {
-      name: '細胞壁',
-      emoji: '🧱',
-      color: 'bg-green-100',
-      function: '支撐與保護植物細胞',
-      memory: '像植物細胞的外牆。'
-    },
-    {
-      name: '葉綠體',
-      emoji: '🌿',
-      color: 'bg-lime-100',
-      function: '進行光合作用',
-      memory: '像太陽能發電機。'
-    },
-    {
-      name: '液胞',
-      emoji: '💧',
-      color: 'bg-cyan-100',
-      function: '儲存水分與養分',
-      memory: '像細胞的小水庫。'
-    }
-  ];
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>細胞構造學習平台</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-br from-sky-50 to-green-50 min-h-screen p-6">
 
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-sky-50 to-green-50 p-6">
-      <div className="max-w-6xl mx-auto">
-        <div className="text-center mb-10">
-          <h1 className="text-5xl font-bold text-slate-800 mb-4">
-            細胞構造學習平台
-          </h1>
-          <p className="text-lg text-slate-600">
-            用圖像與記憶法快速理解細胞構造
-          </p>
-        </div>
+  <div class="max-w-6xl mx-auto">
 
-        {/* 細胞示意圖 */}
-        <div className="grid md:grid-cols-2 gap-8 mb-10">
-          <div className="bg-white rounded-3xl shadow-xl p-8">
-            <h2 className="text-3xl font-bold mb-6 text-center text-green-700">
-              植物細胞
-            </h2>
+    <!-- 標題 -->
+    <div class="text-center mb-10">
+      <h1 class="text-5xl font-bold text-slate-800 mb-4">
+        細胞構造學習平台
+      </h1>
+      <p class="text-lg text-slate-600">
+        用圖像與記憶法快速理解細胞構造
+      </p>
+    </div>
 
-            <div className="relative w-full h-[420px] border-8 border-green-600 rounded-3xl bg-green-100 overflow-hidden">
-              <div className="absolute inset-4 border-4 border-green-300 rounded-3xl">
-                <div className="absolute inset-6 bg-yellow-50 rounded-3xl">
-                  <div className="absolute top-10 left-10 w-20 h-20 rounded-full bg-pink-300 flex items-center justify-center text-xl font-bold shadow-lg">
-                    核
-                  </div>
+    <!-- 細胞圖 -->
+    <div class="grid md:grid-cols-2 gap-8 mb-10">
 
-                  <div className="absolute top-16 right-12 w-16 h-16 rounded-full bg-green-400 flex items-center justify-center text-sm font-bold shadow-lg">
-                    葉綠體
-                  </div>
+      <!-- 植物細胞 -->
+      <div class="bg-white rounded-3xl shadow-xl p-8">
+        <h2 class="text-3xl font-bold mb-6 text-center text-green-700">
+          植物細胞
+        </h2>
 
-                  <div className="absolute bottom-20 right-14 w-24 h-24 rounded-full bg-cyan-300 flex items-center justify-center text-sm font-bold shadow-lg">
-                    液胞
-                  </div>
+        <div class="relative w-full h-[420px] border-8 border-green-600 rounded-3xl bg-green-100 overflow-hidden">
+          <div class="absolute inset-4 border-4 border-green-300 rounded-3xl">
+            <div class="absolute inset-6 bg-yellow-50 rounded-3xl">
 
-                  <div className="absolute bottom-10 left-10 text-slate-700 font-semibold">
-                    細胞質
-                  </div>
-                </div>
+              <div class="absolute top-10 left-10 w-20 h-20 rounded-full bg-pink-300 flex items-center justify-center text-xl font-bold shadow-lg">
+                核
+              </div>
+
+              <div class="absolute top-16 right-12 w-16 h-16 rounded-full bg-green-400 flex items-center justify-center text-sm font-bold shadow-lg">
+                葉綠體
+              </div>
+
+              <div class="absolute bottom-20 right-14 w-24 h-24 rounded-full bg-cyan-300 flex items-center justify-center text-sm font-bold shadow-lg">
+                液胞
+              </div>
+
+              <div class="absolute bottom-10 left-10 text-slate-700 font-semibold">
+                細胞質
               </div>
             </div>
-
-            <div className="mt-4 space-y-2 text-sm text-slate-700">
-              <p>🧱 最外層：細胞壁</p>
-              <p>🫧 第二層：細胞膜</p>
-              <p>🌿 植物特有：葉綠體</p>
-            </div>
           </div>
+        </div>
 
-          <div className="bg-white rounded-3xl shadow-xl p-8">
-            <h2 className="text-3xl font-bold mb-6 text-center text-orange-700">
-              動物細胞
-            </h2>
+        <div class="mt-4 space-y-2 text-sm text-slate-700">
+          <p>🧱 最外層：細胞壁</p>
+          <p>🫧 第二層：細胞膜</p>
+          <p>🌿 植物特有：葉綠體</p>
+        </div>
+      </div>
 
-            <div className="relative w-full h-[420px] rounded-full border-4 border-orange-300 bg-orange-100 overflow-hidden">
-              <div className="absolute inset-6 rounded-full bg-yellow-50">
-                <div className="absolute top-24 left-24 w-24 h-24 rounded-full bg-pink-300 flex items-center justify-center text-xl font-bold shadow-lg">
-                  核
-                </div>
+      <!-- 動物細胞 -->
+      <div class="bg-white rounded-3xl shadow-xl p-8">
+        <h2 class="text-3xl font-bold mb-6 text-center text-orange-700">
+          動物細胞
+        </h2>
 
-                <div className="absolute bottom-20 right-20 w-14 h-14 rounded-full bg-cyan-300 flex items-center justify-center text-xs font-bold shadow-lg">
-                  小液胞
-                </div>
+        <div class="relative w-full h-[420px] rounded-full border-4 border-orange-300 bg-orange-100 overflow-hidden">
+          <div class="absolute inset-6 rounded-full bg-yellow-50">
 
-                <div className="absolute bottom-12 left-14 text-slate-700 font-semibold">
-                  細胞質
-                </div>
-              </div>
+            <div class="absolute top-24 left-24 w-24 h-24 rounded-full bg-pink-300 flex items-center justify-center text-xl font-bold shadow-lg">
+              核
             </div>
 
-            <div className="mt-4 space-y-2 text-sm text-slate-700">
-              <p>🫧 外層只有細胞膜</p>
-              <p>❌ 沒有細胞壁</p>
-              <p>❌ 沒有葉綠體</p>
+            <div class="absolute bottom-20 right-20 w-14 h-14 rounded-full bg-cyan-300 flex items-center justify-center text-xs font-bold shadow-lg">
+              小液胞
+            </div>
+
+            <div class="absolute bottom-12 left-14 text-slate-700 font-semibold">
+              細胞質
             </div>
           </div>
         </div>
 
-        {/* 構造卡片 */}
-        <div className="mb-10">
-          <h2 className="text-3xl font-bold text-center mb-8 text-slate-800">
-            細胞構造記憶卡
-          </h2>
-
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {parts.map((part, index) => (
-              <div
-                key={index}
-                className={`${part.color} rounded-3xl p-6 shadow-lg hover:scale-105 transition duration-300`}
-              >
-                <div className="text-5xl mb-4">{part.emoji}</div>
-                <h3 className="text-2xl font-bold mb-3 text-slate-800">
-                  {part.name}
-                </h3>
-
-                <div className="bg-white rounded-2xl p-4 mb-4">
-                  <p className="font-semibold text-slate-700 mb-2">功能：</p>
-                  <p className="text-slate-600">{part.function}</p>
-                </div>
-
-                <div className="bg-white rounded-2xl p-4">
-                  <p className="font-semibold text-slate-700 mb-2">記憶法：</p>
-                  <p className="text-slate-600">{part.memory}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* 比較表 */}
-        <div className="bg-white rounded-3xl shadow-xl p-8 mb-10 overflow-x-auto">
-          <h2 className="text-3xl font-bold text-center mb-6 text-slate-800">
-            動物細胞 vs 植物細胞
-          </h2>
-
-          <table className="w-full text-center border-collapse overflow-hidden rounded-2xl">
-            <thead>
-              <tr className="bg-slate-200">
-                <th className="p-4 text-lg">構造</th>
-                <th className="p-4 text-lg">動物細胞</th>
-                <th className="p-4 text-lg">植物細胞</th>
-              </tr>
-            </thead>
-            <tbody>
-              {[
-                ['細胞膜', '⭕', '⭕'],
-                ['細胞核', '⭕', '⭕'],
-                ['細胞質', '⭕', '⭕'],
-                ['細胞壁', '❌', '⭕'],
-                ['葉綠體', '❌', '⭕'],
-                ['液胞', '小或沒有', '大且明顯']
-              ].map((row, index) => (
-                <tr key={index} className="border-b hover:bg-slate-50">
-                  <td className="p-4 font-bold">{row[0]}</td>
-                  <td className="p-4">{row[1]}</td>
-                  <td className="p-4">{row[2]}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        {/* 口訣 */}
-        <div className="bg-gradient-to-r from-green-400 to-emerald-500 rounded-3xl shadow-xl p-8 text-white text-center">
-          <h2 className="text-4xl font-bold mb-6">
-            快速記憶口訣
-          </h2>
-
-          <div className="grid md:grid-cols-2 gap-6">
-            <div className="bg-white/20 rounded-2xl p-6 backdrop-blur-sm">
-              <h3 className="text-2xl font-bold mb-4">植物細胞特有</h3>
-              <p className="text-4xl font-bold mb-2">「壁、葉、液」</p>
-              <p>細胞壁、葉綠體、液胞</p>
-            </div>
-
-            <div className="bg-white/20 rounded-2xl p-6 backdrop-blur-sm">
-              <h3 className="text-2xl font-bold mb-4">細胞核功能</h3>
-              <p className="text-4xl font-bold mb-2">「核管控制與遺傳」</p>
-              <p>控制細胞活動、儲存DNA</p>
-            </div>
-          </div>
+        <div class="mt-4 space-y-2 text-sm text-slate-700">
+          <p>🫧 外層只有細胞膜</p>
+          <p>❌ 沒有細胞壁</p>
+          <p>❌ 沒有葉綠體</p>
         </div>
       </div>
     </div>
-  );
-}
+
+    <!-- 記憶卡 -->
+    <div class="mb-10">
+      <h2 class="text-3xl font-bold text-center mb-8 text-slate-800">
+        細胞構造記憶卡
+      </h2>
+
+      <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+
+        <div class="bg-blue-100 rounded-3xl p-6 shadow-lg hover:scale-105 duration-300">
+          <div class="text-5xl mb-4">🫧</div>
+          <h3 class="text-2xl font-bold mb-3">細胞膜</h3>
+          <div class="bg-white rounded-2xl p-4 mb-4">
+            <p class="font-semibold">功能：</p>
+            <p>控制物質進出、保護細胞</p>
+          </div>
+          <div class="bg-white rounded-2xl p-4">
+            <p class="font-semibold">記憶法：</p>
+            <p>像細胞的大門</p>
+          </div>
+        </div>
+
+        <div class="bg-yellow-100 rounded-3xl p-6 shadow-lg hover:scale-105 duration-300">
+          <div class="text-5xl mb-4">🧪</div>
+          <h3 class="text-2xl font-bold mb-3">細胞質</h3>
+          <div class="bg-white rounded-2xl p-4 mb-4">
+            <p class="font-semibold">功能：</p>
+            <p>化學反應進行的地方</p>
+          </div>
+          <div class="bg-white rounded-2xl p-4">
+            <p class="font-semibold">記憶法：</p>
+            <p>像工廠的工作區</p>
+          </div>
+        </div>
+
+        <div class="bg-pink-100 rounded-3xl p-6 shadow-lg hover:scale-105 duration-300">
+          <div class="text-5xl mb-4">🧠</div>
+          <h3 class="text-2xl font-bold mb-3">細胞核</h3>
+          <div class="bg-white rounded-2xl p-4 mb-4">
+            <p class="font-semibold">功能：</p>
+            <p>控制細胞活動、儲存DNA</p>
+          </div>
+          <div class="bg-white rounded-2xl p-4">
+            <p class="font-semibold">記憶法：</p>
+            <p>像細胞的大腦</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- 比較表 -->
+    <div class="bg-white rounded-3xl shadow-xl p-8 mb-10 overflow-x-auto">
+      <h2 class="text-3xl font-bold text-center mb-6 text-slate-800">
+        動物細胞 vs 植物細胞
+      </h2>
+
+      <table class="w-full text-center border-collapse overflow-hidden rounded-2xl">
+        <thead>
+          <tr class="bg-slate-200">
+            <th class="p-4 text-lg">構造</th>
+            <th class="p-4 text-lg">動物細胞</th>
+            <th class="p-4 text-lg">植物細胞</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr class="border-b hover:bg-slate-50">
+            <td class="p-4 font-bold">細胞膜</td>
+            <td>⭕</td>
+            <td>⭕</td>
+          </tr>
+
+          <tr class="border-b hover:bg-slate-50">
+            <td class="p-4 font-bold">細胞壁</td>
+            <td>❌</td>
+            <td>⭕</td>
+          </tr>
+
+          <tr class="border-b hover:bg-slate-50">
+            <td class="p-4 font-bold">葉綠體</td>
+            <td>❌</td>
+            <td>⭕</td>
+          </tr>
+
+          <tr class="border-b hover:bg-slate-50">
+            <td class="p-4 font-bold">液胞</td>
+            <td>小或沒有</td>
+            <td>大且明顯</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- 口訣 -->
+    <div class="bg-gradient-to-r from-green-400 to-emerald-500 rounded-3xl shadow-xl p-8 text-white text-center">
+      <h2 class="text-4xl font-bold mb-6">
+        快速記憶口訣
+      </h2>
+
+      <div class="grid md:grid-cols-2 gap-6">
+
+        <div class="bg-white/20 rounded-2xl p-6 backdrop-blur-sm">
+          <h3 class="text-2xl font-bold mb-4">植物細胞特有</h3>
+          <p class="text-4xl font-bold mb-2">壁、葉、液</p>
+          <p>細胞壁、葉綠體、液胞</p>
+        </div>
+
+        <div class="bg-white/20 rounded-2xl p-6 backdrop-blur-sm">
+          <h3 class="text-2xl font-bold mb-4">細胞核功能</h3>
+          <p class="text-4xl font-bold mb-2">核管控制與遺傳</p>
+          <p>控制細胞活動、儲存DNA</p>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+</body>
+</html>
