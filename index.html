@@ -1,212 +1,1068 @@
 <!DOCTYPE html>
-<html lang="zh-Hant">
+<html lang="zh-Hant" class="transition-colors duration-300">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>細胞構造學習平台</title>
+  <title>細胞構造學習平台 🦠 - 互動探索與記憶</title>
+  
+  <!-- 引入 Tailwind CSS 提供快速的美化樣式 -->
   <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- 引入 Google Fonts 提升中英文的字體質感，選用 Outfit 作為英文，Noto Sans TC 作為中文 -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
+  
+  <!-- 配置 Tailwind CSS 啟用深色模式 (Class 觸發) 與字型 -->
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Outfit', 'Noto Sans TC', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+  
+  <style>
+    /* 微動畫：使資訊面板切換時有淡入與微微浮現的效果 */
+    .fade-in {
+      animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* 3D 卡片翻轉的基礎透視 */
+    .card-perspective {
+      perspective: 1000px;
+    }
+    
+    /* 3D 翻轉卡片的內容器，控制旋轉 */
+    .card-inner {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+      transform-style: preserve-3d;
+    }
+    
+    /* 當卡片被標記為翻轉時，旋轉 180 度 */
+    .card-inner.flipped {
+      transform: rotateY(180deg);
+    }
+    
+    /* 定義卡片的正面與背面，背面預設隱藏 backface */
+    .card-front, .card-back {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+    }
+    
+    /* 卡片背面旋轉 180 度，使其在翻轉後呈正向 */
+    .card-back {
+      transform: rotateY(180deg);
+    }
+
+    /* SVG 各構造的懸停與選取樣式 */
+    .cell-part {
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    /* 當滑鼠懸停在構造上時，產生發光效果，提示使用者此處可點擊 */
+    .cell-part:hover {
+      filter: drop-shadow(0 0 8px rgba(234, 179, 8, 0.8));
+      opacity: 0.95;
+    }
+    
+    /* 當某個構造處於選取狀態時，賦予強烈的發光框與黃色邊框 */
+    .cell-part.active {
+      filter: drop-shadow(0 0 12px rgba(234, 179, 8, 1));
+      stroke: #eab308 !important;
+      stroke-width: 4px !important;
+      opacity: 1;
+    }
+
+    /* 背景呼吸燈動畫效果，增加網頁動態感 */
+    .pulse-bg {
+      animation: pulseGlow 10s ease-in-out infinite alternate;
+    }
+    @keyframes pulseGlow {
+      0% { opacity: 0.3; }
+      100% { opacity: 0.6; }
+    }
+  </style>
 </head>
-<body class="bg-gradient-to-br from-sky-50 to-green-50 min-h-screen p-6">
+<body class="bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900 text-slate-800 dark:text-slate-100 min-h-screen font-sans antialiased transition-colors duration-300 relative overflow-x-hidden">
 
-  <div class="max-w-6xl mx-auto">
+  <!-- 裝飾用背景漸層粒子 (增加進階科技質感) -->
+  <div class="absolute top-[-10%] left-[-10%] w-[50vw] h-[50vw] rounded-full bg-emerald-300/10 dark:bg-emerald-500/5 blur-[120px] pointer-events-none pulse-bg"></div>
+  <div class="absolute bottom-[-10%] right-[-10%] w-[50vw] h-[50vw] rounded-full bg-orange-300/10 dark:bg-orange-500/5 blur-[120px] pointer-events-none pulse-bg" style="animation-delay: -5s;"></div>
 
-    <!-- 標題 -->
-    <div class="text-center mb-10">
-      <h1 class="text-5xl font-bold text-slate-800 mb-4">
-        細胞構造學習平台
+  <!-- 頂部導覽列 -->
+  <header class="sticky top-0 z-50 bg-white/70 dark:bg-slate-900/70 backdrop-blur-md border-b border-slate-200/50 dark:border-slate-800/50 transition-all duration-300">
+    <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <span class="text-3xl">🦠</span>
+        <span class="text-xl font-bold bg-gradient-to-r from-emerald-600 to-teal-500 dark:from-emerald-400 dark:to-teal-300 bg-clip-text text-transparent">
+          細胞構造學習平台
+        </span>
+      </div>
+      
+      <!-- 快速導覽與控制區 -->
+      <nav class="hidden md:flex items-center space-x-6">
+        <a href="#interactive-explore" class="text-sm font-medium hover:text-emerald-500 dark:hover:text-emerald-400 transition-colors">互動探索</a>
+        <a href="#memory-cards" class="text-sm font-medium hover:text-emerald-500 dark:hover:text-emerald-400 transition-colors">3D記憶卡</a>
+        <a href="#compare-table" class="text-sm font-medium hover:text-emerald-500 dark:hover:text-emerald-400 transition-colors">構造對照</a>
+        <a href="#quiz-section" class="text-sm font-medium hover:text-emerald-500 dark:hover:text-emerald-400 transition-colors">自我測驗</a>
+      </nav>
+
+      <!-- 深色模式切換按鈕 -->
+      <button id="theme-toggle" class="p-2.5 rounded-2xl bg-slate-100 dark:bg-slate-800 border border-slate-200/50 dark:border-slate-700/50 hover:scale-105 duration-200 text-lg shadow-sm" aria-label="切換主題">
+        🌓
+      </button>
+    </div>
+  </header>
+
+  <!-- 主要內容區 -->
+  <main class="max-w-7xl mx-auto px-6 py-8 relative z-10 space-y-16">
+
+    <!-- 標題大圖 -->
+    <section class="text-center py-6">
+      <div class="inline-flex items-center space-x-2 bg-emerald-100/60 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 px-4 py-1.5 rounded-full text-xs font-semibold mb-4 shadow-sm border border-emerald-200/30">
+        <span>✨ 學生學習專用互動版</span>
+      </div>
+      <h1 class="text-4xl md:text-5xl lg:text-6xl font-extrabold text-slate-800 dark:text-white tracking-tight mb-4">
+        探索奧妙的<span class="bg-gradient-to-r from-emerald-500 via-teal-500 to-indigo-500 bg-clip-text text-transparent">細胞世界</span>
       </h1>
-      <p class="text-lg text-slate-600">
-        用圖像與記憶法快速理解細胞構造
+      <p class="text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
+        藉由高畫質互動式 SVG 圖形、3D 翻轉記憶卡與即時自我測驗，讓原本枯燥的生物構造變得直覺、立體且好記！
+      </p>
+    </section>
+
+    <!-- 區塊一：互動探索區 (主打 SVG 互動) -->
+    <section id="interactive-explore" class="scroll-mt-24 space-y-6">
+      <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
+        <h2 class="text-2xl md:text-3xl font-extrabold text-slate-800 dark:text-white flex items-center gap-2">
+          <span>🔍</span> 構造互動探索區
+        </h2>
+        <span class="text-xs text-slate-500 dark:text-slate-400">點擊細胞內的構造可查看功能</span>
+      </div>
+
+      <!-- 三欄式大版面配置 (左：植物細胞，中：構造說明面板，右：動物細胞) -->
+      <div class="grid lg:grid-cols-3 gap-8">
+        
+        <!-- 左欄：植物細胞 SVG 卡片 -->
+        <div class="bg-white/80 dark:bg-slate-800/80 backdrop-blur-md rounded-3xl p-6 border border-slate-200/40 dark:border-slate-700/30 shadow-xl flex flex-col justify-between">
+          <div class="text-center mb-4">
+            <span class="bg-green-100 dark:bg-green-950/40 text-green-700 dark:text-green-300 px-3 py-1 rounded-xl text-sm font-bold border border-green-200/30">
+              🌿 植物細胞 (Plant Cell)
+            </span>
+          </div>
+          
+          <!-- 植物細胞 SVG -->
+          <div class="flex justify-center items-center my-4">
+            <svg id="plant-cell-svg" class="w-full max-w-[340px] aspect-square" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+              <!-- 細胞壁 (最外層粗綠框) -->
+              <rect class="cell-part fill-emerald-100/60 dark:fill-emerald-950/30 stroke-emerald-700 dark:stroke-emerald-600 stroke-[16] hover:stroke-yellow-400 transition-all duration-300" x="15" y="15" width="370" height="370" rx="40" ry="40" data-part="cell-wall" />
+              
+              <!-- 細胞膜 (內側細綠框) -->
+              <rect class="cell-part fill-emerald-50/70 dark:fill-emerald-900/10 stroke-emerald-400 dark:stroke-emerald-500 stroke-[4] hover:stroke-yellow-400 transition-all duration-300" x="26" y="26" width="348" height="348" rx="30" ry="30" data-part="cell-membrane" />
+              
+              <!-- 細胞質 (透明底，用於點擊空白處代表細胞質) -->
+              <rect class="cell-part fill-emerald-50/20 dark:fill-emerald-950/5 hover:fill-yellow-100/10 transition-all duration-300" x="30" y="30" width="340" height="340" rx="26" ry="26" data-part="cytoplasm" />
+              
+              <!-- 大液胞 (巨大淺藍色) -->
+              <g class="cell-part group" data-part="vacuole">
+                <path d="M 220,150 C 190,180 180,260 210,310 C 240,350 310,340 330,290 C 350,240 340,160 300,140 C 270,125 240,130 220,150 Z" class="fill-sky-200/80 dark:fill-sky-950/50 stroke-sky-400 dark:stroke-sky-500 stroke-2 group-hover:stroke-yellow-400 transition-all duration-300" />
+                <text x="270" y="240" class="text-xs font-bold fill-sky-800 dark:fill-sky-300" text-anchor="middle">大液胞</text>
+              </g>
+
+              <!-- 細胞核 (粉色圓形，含核仁與染色質紋路) -->
+              <g class="cell-part group" data-part="nucleus">
+                <circle cx="120" cy="130" r="45" class="fill-pink-300 dark:fill-pink-950/60 stroke-pink-500 dark:stroke-pink-400 stroke-2 group-hover:stroke-yellow-400 transition-all duration-300" />
+                <circle cx="105" cy="115" r="14" class="fill-pink-500 dark:fill-pink-400" />
+                <path d="M 125,110 Q 135,125 140,140 M 98,142 Q 115,148 132,152" class="stroke-pink-600 dark:stroke-pink-300 stroke-[1.5] fill-none opacity-50" />
+                <text x="120" y="134" class="text-xs font-bold fill-pink-900 dark:fill-pink-200" text-anchor="middle">細胞核</text>
+              </g>
+
+              <!-- 葉綠體 1 (右上綠色橢圓) -->
+              <g class="cell-part group" data-part="chloroplast">
+                <ellipse cx="290" cy="85" rx="35" ry="20" transform="rotate(-15, 290, 85)" class="fill-teal-400 dark:fill-teal-950/60 stroke-teal-600 dark:stroke-teal-500 stroke-2 group-hover:stroke-yellow-400 transition-all duration-300" />
+                <line x1="270" y1="80" x2="310" y2="76" class="stroke-teal-700 dark:stroke-teal-400 stroke-[3] stroke-linecap-round" transform="rotate(-15, 290, 85)" />
+                <line x1="265" y1="87" x2="315" y2="83" class="stroke-teal-700 dark:stroke-teal-400 stroke-[3] stroke-linecap-round" transform="rotate(-15, 290, 85)" />
+                <line x1="272" y1="94" x2="308" y2="90" class="stroke-teal-700 dark:stroke-teal-400 stroke-[3] stroke-linecap-round" transform="rotate(-15, 290, 85)" />
+                <text x="290" y="89" class="text-[9px] font-bold fill-teal-950 dark:fill-teal-200" text-anchor="middle" transform="rotate(-15, 290, 85)">葉綠體</text>
+              </g>
+
+              <!-- 葉綠體 2 (左下綠色橢圓) -->
+              <g class="cell-part group" data-part="chloroplast">
+                <ellipse cx="90" cy="265" rx="35" ry="20" transform="rotate(30, 90, 265)" class="fill-teal-400 dark:fill-teal-950/60 stroke-teal-600 dark:stroke-teal-500 stroke-2 group-hover:stroke-yellow-400 transition-all duration-300" />
+                <line x1="70" y1="260" x2="110" y2="256" class="stroke-teal-700 dark:stroke-teal-400 stroke-[3]" transform="rotate(30, 90, 265)" />
+                <line x1="65" y1="267" x2="115" y2="263" class="stroke-teal-700 dark:stroke-teal-400 stroke-[3]" transform="rotate(30, 90, 265)" />
+                <line x1="72" y1="274" x2="108" y2="270" class="stroke-teal-700 dark:stroke-teal-400 stroke-[3]" transform="rotate(30, 90, 265)" />
+                <text x="90" y="269" class="text-[9px] font-bold fill-teal-950 dark:fill-teal-200" text-anchor="middle" transform="rotate(30, 90, 265)">葉綠體</text>
+              </g>
+
+              <!-- 線粒體 1 (左下橙色橢圓) -->
+              <g class="cell-part group" data-part="mitochondria">
+                <ellipse cx="140" cy="325" rx="28" ry="16" transform="rotate(-20, 140, 325)" class="fill-orange-400 dark:fill-orange-950/60 stroke-orange-600 dark:stroke-orange-500 stroke-2 group-hover:stroke-yellow-400 transition-all duration-300" />
+                <path d="M 120,323 Q 126,315 129,327 Q 133,313 138,330 Q 143,315 147,331 Q 152,317 159,325" class="stroke-orange-700 dark:stroke-orange-300 stroke-2 fill-none stroke-linecap-round" transform="rotate(-20, 140, 325)" />
+                <text x="140" y="329" class="text-[8px] font-bold fill-orange-950 dark:fill-orange-200" text-anchor="middle" transform="rotate(-20, 140, 325)">線粒體</text>
+              </g>
+
+              <!-- 線粒體 2 (中部偏右上) -->
+              <g class="cell-part group" data-part="mitochondria">
+                <ellipse cx="205" cy="80" rx="28" ry="16" transform="rotate(45, 205, 80)" class="fill-orange-400 dark:fill-orange-950/60 stroke-orange-600 dark:stroke-orange-500 stroke-2 group-hover:stroke-yellow-400 transition-all duration-300" />
+                <path d="M 185,78 Q 191,70 194,82 Q 198,68 203,85 Q 208,70 212,86 Q 217,72 224,80" class="stroke-orange-700 dark:stroke-orange-300 stroke-2 fill-none stroke-linecap-round" transform="rotate(45, 205, 80)" />
+                <text x="205" y="84" class="text-[8px] font-bold fill-orange-950 dark:fill-orange-200" text-anchor="middle" transform="rotate(45, 205, 80)">線粒體</text>
+              </g>
+            </svg>
+          </div>
+
+          <div class="mt-4 text-xs text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-900/50 p-3 rounded-2xl border border-slate-100 dark:border-slate-800">
+            💡 <span class="font-semibold">特色</span>：外圍有極厚的細胞壁，且內部有綠色的葉綠體與一個巨大的中央液胞。
+          </div>
+        </div>
+
+        <!-- 中欄：構造詳細面板 (動態內容呈現) -->
+        <div class="bg-white/80 dark:bg-slate-800/80 backdrop-blur-md rounded-3xl p-8 border border-slate-200/40 dark:border-slate-700/30 shadow-xl flex flex-col justify-between min-h-[460px] relative overflow-hidden">
+          <!-- 裝飾用毛玻璃大卡片內部背景 -->
+          <div class="absolute inset-0 bg-gradient-to-b from-transparent to-slate-50/50 dark:to-slate-900/20 pointer-events-none"></div>
+
+          <div id="info-panel-content" class="relative z-10 flex flex-col h-full justify-between">
+            <!-- 預設提示狀態 -->
+            <div id="info-placeholder" class="flex flex-col items-center justify-center text-center my-auto space-y-4">
+              <span class="text-6xl animate-bounce" style="animation-duration: 3s;">🔍</span>
+              <h3 class="text-xl font-bold">點擊構造開始探索</h3>
+              <p class="text-sm text-slate-500 dark:text-slate-400 max-w-[240px]">
+                請在左右兩側的圖中點擊任意「細胞構造」，或是點擊下方按鈕選擇。
+              </p>
+              
+              <!-- 快捷按鈕選擇組 -->
+              <div class="flex flex-wrap justify-center gap-2 pt-4">
+                <button onclick="selectPart('nucleus')" class="px-3 py-1.5 text-xs bg-slate-100 hover:bg-emerald-100 dark:bg-slate-700 dark:hover:bg-emerald-900/40 rounded-xl transition-all">🧠 細胞核</button>
+                <button onclick="selectPart('mitochondria')" class="px-3 py-1.5 text-xs bg-slate-100 hover:bg-emerald-100 dark:bg-slate-700 dark:hover:bg-emerald-900/40 rounded-xl transition-all">⚡ 線粒體</button>
+                <button onclick="selectPart('chloroplast')" class="px-3 py-1.5 text-xs bg-slate-100 hover:bg-emerald-100 dark:bg-slate-700 dark:hover:bg-emerald-900/40 rounded-xl transition-all">🌿 葉綠體</button>
+                <button onclick="selectPart('cell-wall')" class="px-3 py-1.5 text-xs bg-slate-100 hover:bg-emerald-100 dark:bg-slate-700 dark:hover:bg-emerald-900/40 rounded-xl transition-all">🧱 細胞壁</button>
+              </div>
+            </div>
+
+            <!-- 動態構造詳細資訊內容 (預設隱藏) -->
+            <div id="info-details" class="hidden space-y-6 fade-in h-full flex flex-col justify-between">
+              <div>
+                <!-- 構造標題與 Emoji -->
+                <div class="flex items-center space-x-4">
+                  <span id="part-emoji" class="text-5xl p-3 bg-slate-100 dark:bg-slate-700/60 rounded-3xl shadow-inner">🦠</span>
+                  <div>
+                    <h3 id="part-name" class="text-2xl font-black text-slate-800 dark:text-white">細胞構造</h3>
+                    <p id="part-english" class="text-sm font-semibold text-slate-400 tracking-wide uppercase">Structure Name</p>
+                  </div>
+                </div>
+
+                <!-- 存在性標記 -->
+                <div class="mt-4">
+                  <span id="part-presence" class="inline-flex items-center px-3 py-1 text-xs font-bold rounded-lg bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-300 border border-emerald-200/20">
+                    存在：植物細胞 ⭕ | 動物細胞 ⭕
+                  </span>
+                </div>
+
+                <!-- 功能說明 -->
+                <div class="mt-6 space-y-1">
+                  <h4 class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">🧬 生理功能</h4>
+                  <p id="part-function" class="text-slate-700 dark:text-slate-300 text-sm leading-relaxed font-medium">
+                    構造功能說明載入中...
+                  </p>
+                </div>
+              </div>
+
+              <!-- 記憶口訣 -->
+              <div id="part-memory-box" class="bg-gradient-to-r from-amber-500/10 to-orange-500/10 dark:from-amber-500/5 dark:to-orange-500/5 border border-amber-500/20 rounded-2xl p-4">
+                <h4 class="text-xs font-bold text-amber-600 dark:text-amber-400 flex items-center gap-1.5 mb-1.5">
+                  💡 聯想記憶法
+                </h4>
+                <p id="part-memory" class="text-slate-700 dark:text-slate-300 text-sm italic font-medium">
+                  記憶方法載入中...
+                </p>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- 右欄：動物細胞 SVG 卡片 -->
+        <div class="bg-white/80 dark:bg-slate-800/80 backdrop-blur-md rounded-3xl p-6 border border-slate-200/40 dark:border-slate-700/30 shadow-xl flex flex-col justify-between">
+          <div class="text-center mb-4">
+            <span class="bg-orange-100 dark:bg-orange-950/40 text-orange-700 dark:text-orange-300 px-3 py-1 rounded-xl text-sm font-bold border border-orange-200/30">
+              🦁 動物細胞 (Animal Cell)
+            </span>
+          </div>
+          
+          <!-- 動物細胞 SVG -->
+          <div class="flex justify-center items-center my-4">
+            <svg id="animal-cell-svg" class="w-full max-w-[340px] aspect-square" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+              <!-- 細胞膜 (最外層，呈不規則大圓，無細胞壁) -->
+              <path class="cell-part fill-orange-50/60 dark:fill-orange-950/10 stroke-orange-400 dark:stroke-orange-500 stroke-[8] hover:stroke-yellow-400 transition-all duration-300" d="M 200,25 C 310,25 380,80 375,190 C 370,300 295,370 190,370 C 85,370 25,300 25,190 C 25,80 90,25 200,25 Z" data-part="cell-membrane" />
+              
+              <!-- 細胞質 (內部透明底，用於點擊空白代表細胞質) -->
+              <path class="cell-part fill-orange-50/20 dark:fill-orange-950/5 hover:fill-yellow-100/10 transition-all duration-300" d="M 200,31 C 304,31 370,84 365,188 C 360,292 287,358 190,358 C 93,358 33,292 33,188 C 33,84 96,31 200,31 Z" data-part="cytoplasm" />
+
+              <!-- 細胞核 (偏中心，粉色圓形，含核仁與紋路) -->
+              <g class="cell-part group" data-part="nucleus">
+                <circle cx="165" cy="175" r="45" class="fill-pink-300 dark:fill-pink-950/60 stroke-pink-500 dark:stroke-pink-400 stroke-2 group-hover:stroke-yellow-400 transition-all duration-300" />
+                <circle cx="150" cy="160" r="14" class="fill-pink-500 dark:fill-pink-400" />
+                <path d="M 170,155 Q 180,170 185,185 M 143,187 Q 160,193 177,197" class="stroke-pink-600 dark:stroke-pink-300 stroke-[1.5] fill-none opacity-50" />
+                <text x="165" y="179" class="text-xs font-bold fill-pink-900 dark:fill-pink-200" text-anchor="middle">細胞核</text>
+              </g>
+
+              <!-- 小液胞 1 (右上藍色小圓圈) -->
+              <g class="cell-part group" data-part="vacuole">
+                <circle cx="280" cy="120" r="16" class="fill-sky-200/80 dark:fill-sky-950/50 stroke-sky-400 dark:stroke-sky-500 stroke-2 group-hover:stroke-yellow-400 transition-all duration-300" />
+                <text x="280" y="123" class="text-[8px] font-bold fill-sky-800 dark:fill-sky-300" text-anchor="middle">小液胞</text>
+              </g>
+
+              <!-- 小液胞 2 (右下藍色小圓圈) -->
+              <g class="cell-part group" data-part="vacuole">
+                <circle cx="265" cy="270" r="18" class="fill-sky-200/80 dark:fill-sky-950/50 stroke-sky-400 dark:stroke-sky-500 stroke-2 group-hover:stroke-yellow-400 transition-all duration-300" />
+                <text x="265" y="273" class="text-[8px] font-bold fill-sky-800 dark:fill-sky-300" text-anchor="middle">小液胞</text>
+              </g>
+
+              <!-- 線粒體 1 (左下橙色橢圓) -->
+              <g class="cell-part group" data-part="mitochondria">
+                <ellipse cx="120" cy="290" rx="28" ry="16" transform="rotate(30, 120, 290)" class="fill-orange-400 dark:fill-orange-950/60 stroke-orange-600 dark:stroke-orange-500 stroke-2 group-hover:stroke-yellow-400 transition-all duration-300" />
+                <path d="M 98,288 Q 105,280 108,292 Q 113,278 118,295 Q 123,280 128,296 Q 133,282 140,290" class="stroke-orange-700 dark:stroke-orange-300 stroke-2 fill-none stroke-linecap-round" transform="rotate(30, 120, 290)" />
+                <text x="120" y="294" class="text-[8px] font-bold fill-orange-950 dark:fill-orange-200" text-anchor="middle" transform="rotate(30, 120, 290)">線粒體</text>
+              </g>
+
+              <!-- 線粒體 2 (右上橙色橢圓) -->
+              <g class="cell-part group" data-part="mitochondria">
+                <ellipse cx="295" cy="205" rx="28" ry="16" transform="rotate(-40, 295, 205)" class="fill-orange-400 dark:fill-orange-950/60 stroke-orange-600 dark:stroke-orange-500 stroke-2 group-hover:stroke-yellow-400 transition-all duration-300" />
+                <path d="M 273,203 Q 280,195 283,207 Q 287,193 292,210 Q 297,195 301,211 Q 306,197 313,205" class="stroke-orange-700 dark:stroke-orange-300 stroke-2 fill-none stroke-linecap-round" transform="rotate(-40, 295, 205)" />
+                <text x="295" y="209" class="text-[8px] font-bold fill-orange-950 dark:fill-orange-200" text-anchor="middle" transform="rotate(-40, 295, 205)">線粒體</text>
+              </g>
+
+              <!-- 線粒體 3 (左上橙色橢圓) -->
+              <g class="cell-part group" data-part="mitochondria">
+                <ellipse cx="120" cy="85" rx="28" ry="16" transform="rotate(-10, 120, 85)" class="fill-orange-400 dark:fill-orange-950/60 stroke-orange-600 dark:stroke-orange-500 stroke-2 group-hover:stroke-yellow-400 transition-all duration-300" />
+                <path d="M 98,83 Q 105,75 108,87 Q 113,73 118,90 Q 123,75 128,91 Q 133,77 140,85" class="stroke-orange-700 dark:stroke-orange-300 stroke-2 fill-none stroke-linecap-round" transform="rotate(-10, 120, 85)" />
+                <text x="120" y="89" class="text-[8px] font-bold fill-orange-950 dark:fill-orange-200" text-anchor="middle" transform="rotate(-10, 120, 85)">線粒體</text>
+              </g>
+            </svg>
+          </div>
+
+          <div class="mt-4 text-xs text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-900/50 p-3 rounded-2xl border border-slate-100 dark:border-slate-800">
+            💡 <span class="font-semibold">特色</span>：最外層直接是細胞膜，無細胞壁與葉綠體，且液胞小而不明顯，線粒體較多。
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- 區塊二：構造記憶卡 (3D Flip Cards) -->
+    <section id="memory-cards" class="scroll-mt-24 space-y-6">
+      <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
+        <h2 class="text-2xl md:text-3xl font-extrabold text-slate-800 dark:text-white flex items-center gap-2">
+          <span>🧠</span> 細胞構造 3D 記憶卡
+        </h2>
+        <span class="text-xs text-slate-500 dark:text-slate-400">點擊卡片即可進行 3D 翻轉</span>
+      </div>
+
+      <!-- 7 張核心構造的記憶卡網格 -->
+      <div class="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" id="cards-container">
+        <!-- 卡片會透過 JavaScript 動態生成，方便維護，並在後續步驟加載 -->
+      </div>
+    </section>
+
+    <!-- 區塊三：對照比較與口訣 -->
+    <section id="compare-table" class="scroll-mt-24 grid md:grid-cols-12 gap-8">
+      
+      <!-- 左：動物細胞 vs 植物細胞的精緻表格 -->
+      <div class="md:col-span-7 bg-white/80 dark:bg-slate-800/80 backdrop-blur-md rounded-3xl p-8 border border-slate-200/40 dark:border-slate-700/30 shadow-xl overflow-x-auto">
+        <h3 class="text-2xl font-bold mb-6 text-slate-800 dark:text-white flex items-center gap-2">
+          <span>⚖️</span> 動物細胞 vs 植物細胞
+        </h3>
+        
+        <table class="w-full text-center border-collapse">
+          <thead>
+            <tr class="bg-slate-100 dark:bg-slate-700/50 rounded-2xl">
+              <th class="p-4 rounded-l-2xl text-sm font-bold text-slate-500 dark:text-slate-400">構造</th>
+              <th class="p-4 text-sm font-bold text-slate-500 dark:text-slate-400">動物細胞</th>
+              <th class="p-4 rounded-r-2xl text-sm font-bold text-slate-500 dark:text-slate-400">植物細胞</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100 dark:divide-slate-700/40">
+            <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-700/20 transition-all">
+              <td class="p-4 font-semibold text-slate-700 dark:text-slate-300">細胞膜</td>
+              <td class="p-4 text-emerald-500 dark:text-emerald-400 text-lg">⭕</td>
+              <td class="p-4 text-emerald-500 dark:text-emerald-400 text-lg">⭕</td>
+            </tr>
+            <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-700/20 transition-all">
+              <td class="p-4 font-semibold text-slate-700 dark:text-slate-300">細胞壁</td>
+              <td class="p-4 text-rose-500 text-lg">❌</td>
+              <td class="p-4 text-emerald-500 dark:text-emerald-400 text-lg">⭕ (維持形狀)</td>
+            </tr>
+            <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-700/20 transition-all">
+              <td class="p-4 font-semibold text-slate-700 dark:text-slate-300">葉綠體</td>
+              <td class="p-4 text-rose-500 text-lg">❌</td>
+              <td class="p-4 text-emerald-500 dark:text-emerald-400 text-lg">⭕ (進行光合作用)</td>
+            </tr>
+            <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-700/20 transition-all">
+              <td class="p-4 font-semibold text-slate-700 dark:text-slate-300">液胞</td>
+              <td class="p-4 text-slate-600 dark:text-slate-400 text-sm">小或多個</td>
+              <td class="p-4 text-indigo-500 dark:text-indigo-400 text-sm font-semibold">巨大且明顯 (中央液胞)</td>
+            </tr>
+            <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-700/20 transition-all">
+              <td class="p-4 font-semibold text-slate-700 dark:text-slate-300">線粒體</td>
+              <td class="p-4 text-emerald-500 dark:text-emerald-400 text-lg">⭕ (呼吸作用，較多)</td>
+              <td class="p-4 text-emerald-500 dark:text-emerald-400 text-lg">⭕ (呼吸作用，較少)</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- 右：快速記憶口訣卡 (用美觀漸層設計) -->
+      <div class="md:col-span-5 flex flex-col justify-between gap-6">
+        <div class="bg-gradient-to-br from-emerald-500 to-teal-600 text-white rounded-3xl p-8 shadow-xl flex-1 flex flex-col justify-between">
+          <div>
+            <span class="text-xs font-bold bg-white/20 px-3 py-1 rounded-full uppercase tracking-wider">🌟 記憶大絕招 1</span>
+            <h4 class="text-2xl font-black mt-3 mb-2">植物細胞特有構造</h4>
+            <p class="text-4xl font-extrabold text-yellow-300 tracking-wide my-4">「壁、葉、液」</p>
+          </div>
+          <p class="text-sm text-emerald-100/90 leading-relaxed font-medium">
+            植物特有的構造：細胞<span class="font-bold text-white underline">壁</span>、<span class="font-bold text-white underline">葉</span>綠體、中央大<span class="font-bold text-white underline">液</span>胞。考試最愛考，一秒記起來！
+          </p>
+        </div>
+
+        <div class="bg-gradient-to-br from-indigo-500 to-violet-600 text-white rounded-3xl p-8 shadow-xl flex-1 flex flex-col justify-between">
+          <div>
+            <span class="text-xs font-bold bg-white/20 px-3 py-1 rounded-full uppercase tracking-wider">🌟 記憶大絕招 2</span>
+            <h4 class="text-2xl font-black mt-3 mb-2">能量工廠口訣</h4>
+            <p class="text-4xl font-extrabold text-yellow-300 tracking-wide my-4">「線粒發電、葉綠光合」</p>
+          </div>
+          <p class="text-sm text-indigo-100/90 leading-relaxed font-medium">
+            <span class="font-bold text-white underline">線粒</span>體是發電廠（呼吸作用產生能量）；<span class="font-bold text-white underline">葉綠</span>體是光合作用（曬太陽製造養分）。
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 區塊四：自我測驗區 (Quiz Mode) -->
+    <section id="quiz-section" class="scroll-mt-24 space-y-6">
+      <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
+        <h2 class="text-2xl md:text-3xl font-extrabold text-slate-800 dark:text-white flex items-center gap-2">
+          <span>📝</span> 細胞構造自我測驗
+        </h2>
+        <span class="text-xs text-slate-500 dark:text-slate-400">檢測你的細胞知識，挑戰滿分！</span>
+      </div>
+
+      <!-- 測驗卡片主容器 -->
+      <div class="bg-white/80 dark:bg-slate-800/80 backdrop-blur-md rounded-3xl p-8 border border-slate-200/40 dark:border-slate-700/30 shadow-xl max-w-3xl mx-auto overflow-hidden">
+        
+        <!-- 狀態 1：準備開始測驗 -->
+        <div id="quiz-start-view" class="text-center py-8 space-y-6">
+          <span class="text-7xl">🏆</span>
+          <h3 class="text-2xl font-extrabold text-slate-800 dark:text-white">準備好挑戰自我了嗎？</h3>
+          <p class="text-slate-500 dark:text-slate-400 max-w-md mx-auto text-sm">
+            本測驗包含 10 題精心挑選的細胞構造基礎與概念題，答題完畢後會立即顯示正確答案與詳細生物學解析！
+          </p>
+          <button id="btn-start-quiz" class="px-8 py-3.5 bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-bold rounded-2xl shadow-lg shadow-emerald-500/20 hover:scale-105 active:scale-95 duration-200">
+            開始挑戰 ⚡
+          </button>
+        </div>
+
+        <!-- 狀態 2：測驗進行中 -->
+        <div id="quiz-play-view" class="hidden space-y-6">
+          <!-- 上方進度條與分數 -->
+          <div class="flex justify-between items-center text-sm font-semibold">
+            <span class="text-slate-400" id="quiz-progress-text">問題 1 / 10</span>
+            <span class="text-emerald-500" id="quiz-score-text">目前得分：0 分</span>
+          </div>
+          
+          <div class="w-full bg-slate-100 dark:bg-slate-700 h-2 rounded-full overflow-hidden">
+            <div id="quiz-progress-bar" class="bg-gradient-to-r from-emerald-500 to-teal-400 h-full transition-all duration-300" style="width: 10%;"></div>
+          </div>
+
+          <!-- 題目文字 -->
+          <div class="py-4">
+            <h4 id="quiz-question-text" class="text-xl font-bold text-slate-800 dark:text-white leading-relaxed">
+              題目載入中...
+            </h4>
+          </div>
+
+          <!-- 選項按鈕組 -->
+          <div class="grid md:grid-cols-2 gap-4" id="quiz-options-container">
+            <!-- 4 個選項按鈕會動態渲染在此 -->
+          </div>
+
+          <!-- 即時反饋面板 (預設隱藏) -->
+          <div id="quiz-feedback" class="hidden rounded-2xl p-5 border transition-all duration-300">
+            <div class="flex items-center space-x-2 mb-2">
+              <span id="feedback-icon" class="text-2xl">✅</span>
+              <span id="feedback-status" class="font-extrabold text-lg">回答正確！</span>
+            </div>
+            <p id="feedback-explain" class="text-sm font-medium leading-relaxed opacity-90">
+              解析說明...
+            </p>
+            <div class="flex justify-end mt-4">
+              <button id="btn-next-question" class="px-5 py-2.5 bg-slate-800 hover:bg-slate-900 dark:bg-slate-100 dark:hover:bg-white dark:text-slate-900 text-white text-xs font-bold rounded-xl shadow transition-all">
+                下一題 ➔
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 狀態 3：測驗結果 -->
+        <div id="quiz-result-view" class="hidden text-center py-8 space-y-6">
+          <div class="relative inline-block">
+            <span class="text-8xl" id="result-emoji">🎉</span>
+            <!-- 閃爍微粒效果 -->
+            <div class="absolute inset-0 animate-ping rounded-full bg-yellow-400/20 pointer-events-none"></div>
+          </div>
+          
+          <div>
+            <h3 class="text-3xl font-black text-slate-800 dark:text-white mb-2">測驗完成！</h3>
+            <p class="text-slate-500 dark:text-slate-400 text-sm">您的最終得分為</p>
+            <p class="text-5xl font-black text-emerald-500 tracking-tight my-4" id="result-score">80 / 100 分</p>
+            <p class="text-sm font-medium text-slate-700 dark:text-slate-300 max-w-md mx-auto" id="result-comment">
+              評語載入中...
+            </p>
+          </div>
+
+          <div class="flex justify-center gap-4 pt-4">
+            <button id="btn-restart-quiz" class="px-6 py-3 bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-xs font-bold rounded-xl transition-all">
+              再試一次 🔄
+            </button>
+            <a href="#interactive-explore" class="px-6 py-3 bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold rounded-xl transition-all flex items-center shadow-lg shadow-emerald-500/10">
+              複習構造 🔍
+            </a>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- 底部欄 -->
+  <footer class="bg-white dark:bg-slate-900 border-t border-slate-200/50 dark:border-slate-800/50 py-10 mt-16 transition-colors duration-300">
+    <div class="max-w-7xl mx-auto px-6 text-center space-y-4">
+      <p class="text-sm text-slate-500 dark:text-slate-400">
+        🌿 專為國高中生物學習設計的互動式輔助教材 🧬
+      </p>
+      <p class="text-xs text-slate-400 dark:text-slate-500">
+        © 2026 細胞構造學習平台. 本網頁的所有功能皆為純前端實作，不收集個人隱私數據。
       </p>
     </div>
+  </footer>
 
-    <!-- 細胞圖 -->
-    <div class="grid md:grid-cols-2 gap-8 mb-10">
+  <!-- 互動腳本區 (JavaScript Logic) -->
+  <script>
+    // =========================================================================
+    // 1. 細胞構造的生物數據庫
+    // =========================================================================
+    const cellPartsData = {
+      "cell-wall": {
+        name: "細胞壁",
+        english: "Cell Wall",
+        emoji: "🧱",
+        function: "位於植物細胞膜最外層，主要由纖維素構成。具有保護細胞、維持細胞形狀與提供強力支持的功能，使植物體能直立生長。",
+        memory: "像高聳的「城牆」，結構堅硬，是植物特有的「最外層防衛欄」！",
+        presence: "植物細胞 ⭕ | 動物細胞 ❌",
+        color: "emerald"
+      },
+      "cell-membrane": {
+        name: "細胞膜",
+        english: "Cell Membrane",
+        emoji: "🫧",
+        function: "包覆在細胞質外表的一層薄膜，主要由脂質和蛋白質構成。具有選擇性滲透功能，負責控制養分進入、排出代謝廢物，維持細胞內部環境穩定。",
+        memory: "像工廠門口的「警衛室」，負責嚴格檢查哪些物質可以進出！",
+        presence: "植物細胞 ⭕ | 動物細胞 ⭕",
+        color: "amber"
+      },
+      "cytoplasm": {
+        name: "細胞質",
+        english: "Cytoplasm",
+        emoji: "🧪",
+        function: "細胞膜以內、細胞核以外的膠狀半流體物質。包含多種微小胞器，是細胞進行各項新陳代謝與大多數化學反應的核心場所。",
+        memory: "像工廠的「生產車間/工作區」，所有的機器跟化學反應都在此運作！",
+        presence: "植物細胞 ⭕ | 動物細胞 ⭕",
+        color: "green"
+      },
+      "nucleus": {
+        name: "細胞核",
+        english: "Nucleus",
+        emoji: "🧠",
+        function: "細胞的生命中樞。外包有核膜保護，內部含有染色質（DNA）。控制細胞的生理代謝活動、遺傳特性以及細胞的分裂與成長。",
+        memory: "像工廠的「總經理室」或「電腦中央處理器 (CPU)」，掌握所有重要指令！",
+        presence: "植物細胞 ⭕ | 動物細胞 ⭕",
+        color: "pink"
+      },
+      "chloroplast": {
+        name: "葉綠體",
+        english: "Chloroplast",
+        emoji: "🌿",
+        function: "植物特有的綠色胞器，含有葉綠素。是植物進行「光合作用」的地點，能吸收太陽光能，將二氧化碳和水合成為葡萄糖，並釋放出氧氣。",
+        memory: "像「太陽能發電廠與食品廠」，曬太陽就能自己生產糖分便當！",
+        presence: "植物細胞 ⭕ | 動物細胞 ❌",
+        color: "teal"
+      },
+      "vacuole": {
+        name: "液胞",
+        english: "Vacuole",
+        emoji: "💧",
+        function: "由單層膜包覆的泡狀結構。植物細胞常有「中央大液胞」，主要儲存水分、無機鹽、養分及廢物，對維持細胞膨壓十分重要；動物細胞則為「多個小液胞」或甚至沒有。",
+        memory: "像細胞的「大水塔與儲藏室」，植物缺水萎凋就是因為大水塔乾涸了！",
+        presence: "植物細胞 ⭕ (大液胞) | 動物細胞 ⭕ (多個小液胞)",
+        color: "sky"
+      },
+      "mitochondria": {
+        name: "線粒體",
+        english: "Mitochondria",
+        emoji: "⚡",
+        function: "細胞進行「呼吸作用」的主要胞器。透過分解養分（如葡萄糖）並結合氧氣，釋放出大量的能量分子（ATP）供生理活動使用，俗稱細胞的能量工廠。",
+        memory: "像工廠的「發電機」或「引擎」，源源不絕地輸出電力與動力！",
+        presence: "植物細胞 ⭕ | 動物細胞 ⭕",
+        color: "orange"
+      }
+    };
 
-      <!-- 植物細胞 -->
-      <div class="bg-white rounded-3xl shadow-xl p-8">
-        <h2 class="text-3xl font-bold mb-6 text-center text-green-700">
-          植物細胞
-        </h2>
+    // =========================================================================
+    // 2. 自我測驗題目數據庫
+    // =========================================================================
+    const quizQuestions = [
+      {
+        question: "哪一個構造負責透過呼吸作用產生能量，被稱為細胞的「能量發電廠」？",
+        options: ["細胞核", "葉綠體", "線粒體", "液胞"],
+        answer: 2,
+        explain: "線粒體（Mitochondria）是細胞進行呼吸作用的場所，能將葡萄糖與氧氣轉換為細胞活動所需的能量（ATP），故俗稱發電廠。"
+      },
+      {
+        question: "植物細胞最外層、主要由纖維素構成，能維持細胞形狀且具保護功能的是？",
+        options: ["細胞膜", "細胞壁", "細胞質", "細胞核"],
+        answer: 1,
+        explain: "細胞壁（Cell Wall）是植物、真菌及細菌特有的構造，位於細胞膜外側，具有極高的硬度，能提供支持與維持細胞的特定形狀。"
+      },
+      {
+        question: "哪一個構造內含遺傳物質 DNA，被譽為細胞的「生命指揮中心」？",
+        options: ["細胞核", "線粒體", "液胞", "葉綠體"],
+        answer: 0,
+        explain: "細胞核（Nucleus）內含有染色質（主要成分為 DNA），是儲存遺傳圖紙、控制細胞生理活動與分裂的指揮中心。"
+      },
+      {
+        question: "負責控制物質進出細胞，像工廠警衛大門一樣的構造是？",
+        options: ["細胞壁", "細胞膜", "細胞核", "細胞質"],
+        answer: 1,
+        explain: "細胞膜（Cell Membrane）具有選擇性滲透的半透膜特性，主要功能是保護細胞內部並調控物質（養分與廢物）的出入。"
+      },
+      {
+        question: "植物細胞中通常「巨大且明顯」，能儲存水、廢物並提供膨壓支撐的是哪一個構造？",
+        options: ["小液胞", "大液胞", "細胞質", "葉綠體"],
+        answer: 1,
+        explain: "植物細胞具有顯著的「中央大液胞」，負責儲存水分、無機鹽、代謝物並維持細胞形狀（膨壓）。動物細胞的液胞則小而分散。"
+      },
+      {
+        question: "植物能自己進行光合作用、製造有機養分（葡萄糖），是因為細胞內含有哪種特有胞器？",
+        options: ["線粒體", "葉綠體", "液胞", "細胞核"],
+        answer: 1,
+        explain: "葉綠體（Chloroplast）含有綠色的葉綠素，是植物進行光合作用、將光能轉化為化學能的特有場所。"
+      },
+      {
+        question: "細胞內填充的膠狀物質，是許多胞器懸浮以及化學反應進行的主要場所，這指的是？",
+        options: ["細胞質", "細胞膜", "細胞壁", "細胞液"],
+        answer: 0,
+        explain: "細胞質（Cytoplasm）是細胞膜以內、細胞核以外的半流體膠狀物質，內含多種胞器，為各項生物化學反應提供穩定的場所。"
+      },
+      {
+        question: "關於「動物細胞」與「植物細胞」的比較，下列敘述何者正確？",
+        options: [
+          "動物細胞有細胞壁，植物細胞沒有",
+          "植物細胞有葉綠體，動物細胞沒有",
+          "動物細胞有大液胞，植物細胞有小液胞",
+          "植物細胞沒有線粒體，只有葉綠體"
+        ],
+        answer: 1,
+        explain: "植物細胞擁有細胞壁、葉綠體與大液胞；動物細胞則無細胞壁與葉綠體，且液胞小。特別注意：兩者皆有線粒體。"
+      },
+      {
+        question: "當植物缺水時，植物體會表現出萎凋、垂頭的現象。這主要是因為細胞內的哪一個構造水分流失、膨壓降低所致？",
+        options: ["細胞壁", "細胞膜", "細胞核", "液胞"],
+        answer: 3,
+        explain: "大液胞主要儲存大量水分，當水分充足時會撐起細胞壁（形成膨壓），缺水時大液胞縮小、膨壓降低，導致整株植物體軟萎。"
+      },
+      {
+        question: "下列哪一個構造，是「植物細胞」與「動物細胞」都必須具備的能量轉換器？",
+        options: ["細胞壁", "葉綠體", "線粒體", "大液胞"],
+        answer: 2,
+        explain: "線粒體是動植物細胞皆有的「發電廠」，負責能量轉換。細胞壁和葉綠體是植物特有，大液胞也是植物細胞的特色。"
+      }
+    ];
 
-        <div class="relative w-full h-[420px] border-8 border-green-600 rounded-3xl bg-green-100 overflow-hidden">
-          <div class="absolute inset-4 border-4 border-green-300 rounded-3xl">
-            <div class="absolute inset-6 bg-yellow-50 rounded-3xl">
+    // =========================================================================
+    // 3. UI 主題切換 (深色模式)
+    // =========================================================================
+    const themeToggleBtn = document.getElementById('theme-toggle');
+    
+    // 初始化時檢查本地儲存的主題或系統偏好
+    try {
+      if (localStorage.getItem('color-theme') === 'dark' || 
+          (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        document.documentElement.classList.add('dark');
+        themeToggleBtn.innerHTML = '☀️'; // 深色模式下顯示太陽
+      } else {
+        document.documentElement.classList.remove('dark');
+        themeToggleBtn.innerHTML = '🌙'; // 淺色模式下顯示月亮
+      }
+    } catch (e) {
+      console.warn("無法取得主題設定：", e);
+    }
 
-              <div class="absolute top-10 left-10 w-20 h-20 rounded-full bg-pink-300 flex items-center justify-center text-xl font-bold shadow-lg">
-                核
+    // 點擊按鈕切換深色/淺色模式
+    themeToggleBtn.addEventListener('click', () => {
+      try {
+        if (document.documentElement.classList.contains('dark')) {
+          document.documentElement.classList.remove('dark');
+          localStorage.setItem('color-theme', 'light');
+          themeToggleBtn.innerHTML = '🌙';
+        } else {
+          document.documentElement.classList.add('dark');
+          localStorage.setItem('color-theme', 'dark');
+          themeToggleBtn.innerHTML = '☀️';
+        }
+      } catch (e) {
+        console.error("切換主題發生錯誤：", e);
+      }
+    });
+
+    // =========================================================================
+    // 4. 構造互動探索邏輯
+    // =========================================================================
+    const infoPlaceholder = document.getElementById('info-placeholder');
+    const infoDetails = document.getElementById('info-details');
+    
+    // 面板內元素
+    const partEmoji = document.getElementById('part-emoji');
+    const partName = document.getElementById('part-name');
+    const partEnglish = document.getElementById('part-english');
+    const partPresence = document.getElementById('part-presence');
+    const partFunction = document.getElementById('part-function');
+    const partMemory = document.getElementById('part-memory');
+
+    // 構造選取函數
+    function selectPart(partId) {
+      // 1. 取得構造數據
+      const data = cellPartsData[partId];
+      if (!data) return;
+
+      // 2. 移除所有 SVG 部分的 active 高亮
+      document.querySelectorAll('.cell-part').forEach(el => {
+        el.classList.remove('active');
+      });
+
+      // 3. 為植物和動物細胞 SVG 中對應 data-part 的所有元素加上 active 高亮
+      const matches = document.querySelectorAll(`[data-part="${partId}"]`);
+      matches.forEach(el => {
+        el.classList.add('active');
+      });
+
+      // 4. 更新說明面板內容
+      partEmoji.textContent = data.emoji;
+      partName.textContent = data.name;
+      partEnglish.textContent = data.english;
+      partPresence.textContent = `存在狀況：${data.presence}`;
+      partFunction.textContent = data.function;
+      partMemory.textContent = data.memory;
+
+      // 5. 切換顯示面板
+      infoPlaceholder.classList.add('hidden');
+      infoDetails.classList.remove('hidden');
+
+      // 6. 重置與觸發淡入動畫
+      infoDetails.classList.remove('fade-in');
+      void infoDetails.offsetWidth; // 強制重繪以重啟動畫
+      infoDetails.classList.add('fade-in');
+    }
+
+    // 為所有具備 data-part 的 SVG 元素註冊點擊事件
+    document.querySelectorAll('.cell-part').forEach(part => {
+      part.addEventListener('click', (e) => {
+        // 阻止事件冒泡以避免重複處理
+        e.stopPropagation();
+        
+        // 獲取該 SVG 元素代表的構造 ID
+        const partId = part.getAttribute('data-part');
+        if (partId) {
+          selectPart(partId);
+        }
+      });
+    });
+
+    // 點擊 SVG 外部空白處重置面板
+    document.addEventListener('click', (e) => {
+      // 若點擊的不是 SVG 元素或其子元素，則回復預設提示狀態
+      if (!e.target.closest('.cell-part') && !e.target.closest('#info-panel-content')) {
+        document.querySelectorAll('.cell-part').forEach(el => el.classList.remove('active'));
+        infoPlaceholder.classList.remove('hidden');
+        infoDetails.classList.add('hidden');
+      }
+    });
+
+    // =========================================================================
+    // 5. 記憶卡動態渲染與 3D 翻轉邏輯
+    // =========================================================================
+    const cardsContainer = document.getElementById('cards-container');
+
+    // 根據生物數據庫動態建立 HTML 結構
+    function initMemoryCards() {
+      if (!cardsContainer) return;
+      
+      let html = '';
+      Object.keys(cellPartsData).forEach(key => {
+        const item = cellPartsData[key];
+        
+        // 根據構造設定不同的卡片邊框與背景漸層，提升視覺層次
+        let cardColorClass = 'from-emerald-50 to-teal-50 dark:from-emerald-950/20 dark:to-teal-950/20 border-emerald-200/50 dark:border-emerald-800/40';
+        if (key === 'nucleus') cardColorClass = 'from-pink-50 to-rose-50 dark:from-pink-950/20 dark:to-rose-950/20 border-pink-200/50 dark:border-pink-800/40';
+        if (key === 'mitochondria') cardColorClass = 'from-orange-50 to-amber-50 dark:from-orange-950/20 dark:to-amber-950/20 border-orange-200/50 dark:border-orange-800/40';
+        if (key === 'vacuole') cardColorClass = 'from-sky-50 to-blue-50 dark:from-sky-950/20 dark:to-blue-950/20 border-sky-200/50 dark:border-sky-800/40';
+        if (key === 'cell-membrane') cardColorClass = 'from-amber-50 to-yellow-50 dark:from-amber-950/20 dark:to-yellow-950/20 border-amber-200/50 dark:border-amber-800/40';
+        
+        html += `
+          <div class="card-perspective w-full h-[320px] cursor-pointer" onclick="flipCard(this)">
+            <div class="card-inner w-full h-full rounded-3xl shadow-lg border ${cardColorClass}">
+              
+              <!-- 正面：構造名稱與 Emoji -->
+              <div class="card-front bg-white/95 dark:bg-slate-800/95 absolute inset-0 w-full h-full rounded-3xl p-6 flex flex-col justify-between items-center text-center">
+                <div class="my-auto space-y-4">
+                  <span class="text-6xl p-4 bg-slate-50 dark:bg-slate-700/50 rounded-full inline-block shadow-inner">${item.emoji}</span>
+                  <div>
+                    <h4 class="text-2xl font-black text-slate-800 dark:text-white">${item.name}</h4>
+                    <p class="text-xs font-semibold text-slate-400 tracking-wider uppercase mt-1">${item.english}</p>
+                  </div>
+                </div>
+                <span class="text-xs text-emerald-500 dark:text-emerald-400 font-bold bg-emerald-50 dark:bg-emerald-950/50 px-3 py-1 rounded-xl">
+                  🔍 點擊翻轉查看功能
+                </span>
               </div>
-
-              <div class="absolute top-16 right-12 w-16 h-16 rounded-full bg-green-400 flex items-center justify-center text-sm font-bold shadow-lg">
-                葉綠體
+              
+              <!-- 背面：生理功能與記憶口訣 -->
+              <div class="card-back bg-white/95 dark:bg-slate-800/95 absolute inset-0 w-full h-full rounded-3xl p-6 flex flex-col justify-between overflow-y-auto">
+                <div class="space-y-4">
+                  <div class="flex items-center space-x-2.5 pb-2 border-b border-slate-100 dark:border-slate-700">
+                    <span class="text-2xl">${item.emoji}</span>
+                    <h5 class="text-lg font-bold">${item.name}</h5>
+                  </div>
+                  
+                  <div class="space-y-1">
+                    <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">🧬 主要生理功能</span>
+                    <p class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed font-medium">${item.function}</p>
+                  </div>
+                </div>
+                
+                <div class="bg-amber-500/10 border border-amber-500/20 rounded-xl p-3 mt-2">
+                  <span class="text-[10px] font-bold text-amber-600 dark:text-amber-400 block mb-1">💡 聯想記憶</span>
+                  <p class="text-xs text-slate-700 dark:text-slate-300 italic font-semibold">${item.memory}</p>
+                </div>
               </div>
-
-              <div class="absolute bottom-20 right-14 w-24 h-24 rounded-full bg-cyan-300 flex items-center justify-center text-sm font-bold shadow-lg">
-                液胞
-              </div>
-
-              <div class="absolute bottom-10 left-10 text-slate-700 font-semibold">
-                細胞質
-              </div>
+              
             </div>
           </div>
-        </div>
+        `;
+      });
+      cardsContainer.innerHTML = html;
+    }
 
-        <div class="mt-4 space-y-2 text-sm text-slate-700">
-          <p>🧱 最外層：細胞壁</p>
-          <p>🫧 第二層：細胞膜</p>
-          <p>🌿 植物特有：葉綠體</p>
-        </div>
-      </div>
+    // 翻轉卡片切換 class
+    function flipCard(cardElement) {
+      const inner = cardElement.querySelector('.card-inner');
+      if (inner) {
+        inner.classList.toggle('flipped');
+      }
+    }
 
-      <!-- 動物細胞 -->
-      <div class="bg-white rounded-3xl shadow-xl p-8">
-        <h2 class="text-3xl font-bold mb-6 text-center text-orange-700">
-          動物細胞
-        </h2>
+    // =========================================================================
+    // 6. 互動測驗模式 (Quiz Mode) 邏輯
+    // =========================================================================
+    let currentQuestionIndex = 0;
+    let quizScore = 0;
+    let hasAnswered = false;
 
-        <div class="relative w-full h-[420px] rounded-full border-4 border-orange-300 bg-orange-100 overflow-hidden">
-          <div class="absolute inset-6 rounded-full bg-yellow-50">
+    // DOM 元素
+    const quizStartView = document.getElementById('quiz-start-view');
+    const quizPlayView = document.getElementById('quiz-play-view');
+    const quizResultView = document.getElementById('quiz-result-view');
+    
+    const btnStartQuiz = document.getElementById('btn-start-quiz');
+    const btnRestartQuiz = document.getElementById('btn-restart-quiz');
+    
+    const quizProgressText = document.getElementById('quiz-progress-text');
+    const quizScoreText = document.getElementById('quiz-score-text');
+    const quizProgressBar = document.getElementById('quiz-progress-bar');
+    const quizQuestionText = document.getElementById('quiz-question-text');
+    const quizOptionsContainer = document.getElementById('quiz-options-container');
+    
+    const quizFeedback = document.getElementById('quiz-feedback');
+    const feedbackIcon = document.getElementById('feedback-icon');
+    const feedbackStatus = document.getElementById('feedback-status');
+    const feedbackExplain = document.getElementById('feedback-explain');
+    const btnNextQuestion = document.getElementById('btn-next-question');
+    
+    const resultScore = document.getElementById('result-score');
+    const resultComment = document.getElementById('result-comment');
+    const resultEmoji = document.getElementById('result-emoji');
 
-            <div class="absolute top-24 left-24 w-24 h-24 rounded-full bg-pink-300 flex items-center justify-center text-xl font-bold shadow-lg">
-              核
-            </div>
+    // 啟動測驗
+    function startQuiz() {
+      currentQuestionIndex = 0;
+      quizScore = 0;
+      hasAnswered = false;
+      
+      quizStartView.classList.add('hidden');
+      quizResultView.classList.add('hidden');
+      quizPlayView.classList.remove('hidden');
+      
+      loadQuestion();
+    }
 
-            <div class="absolute bottom-20 right-20 w-14 h-14 rounded-full bg-cyan-300 flex items-center justify-center text-xs font-bold shadow-lg">
-              小液胞
-            </div>
+    // 載入當前題目
+    function loadQuestion() {
+      try {
+        hasAnswered = false;
+        quizFeedback.classList.add('hidden');
+        
+        // 防呆邊界檢查
+        if (currentQuestionIndex >= quizQuestions.length) {
+          showQuizResults();
+          return;
+        }
 
-            <div class="absolute bottom-12 left-14 text-slate-700 font-semibold">
-              細胞質
-            </div>
-          </div>
-        </div>
+        const q = quizQuestions[currentQuestionIndex];
+        
+        // 更新進度與分數顯示
+        quizProgressText.textContent = `問題 ${currentQuestionIndex + 1} / ${quizQuestions.length}`;
+        quizScoreText.textContent = `目前得分：${quizScore} 分`;
+        quizProgressBar.style.width = `${((currentQuestionIndex + 1) / quizQuestions.length) * 100}%`;
+        
+        // 題目文字
+        quizQuestionText.textContent = q.question;
+        
+        // 生成選項按鈕
+        quizOptionsContainer.innerHTML = '';
+        q.options.forEach((option, index) => {
+          const btn = document.createElement('button');
+          btn.className = "w-full p-4 text-left rounded-2xl border-2 border-slate-200/60 dark:border-slate-700/60 hover:bg-slate-50 dark:hover:bg-slate-700/40 text-sm font-semibold transition-all duration-200 flex items-center justify-between group";
+          btn.innerHTML = `
+            <span>${option}</span>
+            <span class="opacity-0 group-hover:opacity-100 transition-opacity text-slate-400">選擇 ➔</span>
+          `;
+          btn.onclick = () => selectOption(index, btn);
+          quizOptionsContainer.appendChild(btn);
+        });
+      } catch (e) {
+        console.error("載入題目時發生錯誤：", e);
+      }
+    }
 
-        <div class="mt-4 space-y-2 text-sm text-slate-700">
-          <p>🫧 外層只有細胞膜</p>
-          <p>❌ 沒有細胞壁</p>
-          <p>❌ 沒有葉綠體</p>
-        </div>
-      </div>
-    </div>
+    // 選擇答案
+    function selectOption(selectedIndex, buttonElement) {
+      if (hasAnswered) return; // 防止重複答題
+      hasAnswered = true;
 
-    <!-- 記憶卡 -->
-    <div class="mb-10">
-      <h2 class="text-3xl font-bold text-center mb-8 text-slate-800">
-        細胞構造記憶卡
-      </h2>
+      const q = quizQuestions[currentQuestionIndex];
+      const allButtons = quizOptionsContainer.querySelectorAll('button');
+      
+      // 禁用所有選項點擊，並給予視覺反饋
+      allButtons.forEach((btn, index) => {
+        btn.onclick = null; // 移除點擊事件
+        
+        if (index === q.answer) {
+          // 正確答案：標綠
+          btn.className = "w-full p-4 text-left rounded-2xl border-2 border-emerald-500 bg-emerald-50 dark:bg-emerald-950/20 text-emerald-800 dark:text-emerald-300 text-sm font-bold transition-all flex items-center justify-between";
+          btn.innerHTML += "<span>✅ 正確</span>";
+        } else if (index === selectedIndex) {
+          // 選錯的答案：標紅
+          btn.className = "w-full p-4 text-left rounded-2xl border-2 border-rose-500 bg-rose-50 dark:bg-rose-950/20 text-rose-800 dark:text-rose-300 text-sm font-bold transition-all flex items-center justify-between";
+          btn.innerHTML += "<span>❌ 錯誤</span>";
+        } else {
+          // 其他未選的錯誤答案：變淡透明度
+          btn.className = "w-full p-4 text-left rounded-2xl border-2 border-slate-200 dark:border-slate-700 opacity-40 text-sm font-semibold transition-all";
+        }
+      });
 
-      <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      // 判斷是否答對並加分
+      const isCorrect = (selectedIndex === q.answer);
+      if (isCorrect) {
+        quizScore += 10;
+        quizScoreText.textContent = `目前得分：${quizScore} 分`;
+        
+        feedbackIcon.textContent = "✅";
+        feedbackStatus.textContent = "回答正確！";
+        quizFeedback.className = "rounded-2xl p-5 border border-emerald-500/20 bg-emerald-50/50 dark:bg-emerald-950/20 text-emerald-800 dark:text-emerald-300 fade-in";
+      } else {
+        feedbackIcon.textContent = "❌";
+        feedbackStatus.textContent = "回答錯誤！";
+        quizFeedback.className = "rounded-2xl p-5 border border-rose-500/20 bg-rose-50/50 dark:bg-rose-950/20 text-rose-800 dark:text-rose-300 fade-in";
+      }
 
-        <div class="bg-blue-100 rounded-3xl p-6 shadow-lg hover:scale-105 duration-300">
-          <div class="text-5xl mb-4">🫧</div>
-          <h3 class="text-2xl font-bold mb-3">細胞膜</h3>
-          <div class="bg-white rounded-2xl p-4 mb-4">
-            <p class="font-semibold">功能：</p>
-            <p>控制物質進出、保護細胞</p>
-          </div>
-          <div class="bg-white rounded-2xl p-4">
-            <p class="font-semibold">記憶法：</p>
-            <p>像細胞的大門</p>
-          </div>
-        </div>
+      // 載入題目解析
+      feedbackExplain.textContent = q.explain;
+      quizFeedback.classList.remove('hidden');
+    }
 
-        <div class="bg-yellow-100 rounded-3xl p-6 shadow-lg hover:scale-105 duration-300">
-          <div class="text-5xl mb-4">🧪</div>
-          <h3 class="text-2xl font-bold mb-3">細胞質</h3>
-          <div class="bg-white rounded-2xl p-4 mb-4">
-            <p class="font-semibold">功能：</p>
-            <p>化學反應進行的地方</p>
-          </div>
-          <div class="bg-white rounded-2xl p-4">
-            <p class="font-semibold">記憶法：</p>
-            <p>像工廠的工作區</p>
-          </div>
-        </div>
+    // 顯示測驗結算結果
+    function showQuizResults() {
+      quizPlayView.classList.add('hidden');
+      quizResultView.classList.remove('hidden');
+      
+      resultScore.textContent = `${quizScore} / ${quizQuestions.length * 10} 分`;
+      
+      // 根據分數給予不同評語
+      if (quizScore === 100) {
+        resultEmoji.textContent = "👑";
+        resultComment.textContent = "完美通關！你是當之無愧的「細胞大師」！對所有細胞構造與生理功能都有極其完美的理解！";
+      } else if (quizScore >= 80) {
+        resultEmoji.textContent = "🎉";
+        resultComment.textContent = "表現優異！您對細胞構造非常熟悉，僅有少數細節需要注意，非常棒！";
+      } else if (quizScore >= 60) {
+        resultEmoji.textContent = "👍";
+        resultComment.textContent = "及格了！您已經掌握了大部分的細胞核心構造，建議再使用上方的「互動探索區」多複習幾次喔！";
+      } else {
+        resultEmoji.textContent = "📚";
+        resultComment.textContent = "加油！細胞構造稍微多了一些，不要氣餒！請配合記憶口訣與 3D 記憶卡重新挑戰，你一定能進步的！";
+      }
+    }
 
-        <div class="bg-pink-100 rounded-3xl p-6 shadow-lg hover:scale-105 duration-300">
-          <div class="text-5xl mb-4">🧠</div>
-          <h3 class="text-2xl font-bold mb-3">細胞核</h3>
-          <div class="bg-white rounded-2xl p-4 mb-4">
-            <p class="font-semibold">功能：</p>
-            <p>控制細胞活動、儲存DNA</p>
-          </div>
-          <div class="bg-white rounded-2xl p-4">
-            <p class="font-semibold">記憶法：</p>
-            <p>像細胞的大腦</p>
-          </div>
-        </div>
+    // 綁定事件監聽
+    btnStartQuiz.addEventListener('click', startQuiz);
+    btnRestartQuiz.addEventListener('click', startQuiz);
+    btnNextQuestion.addEventListener('click', () => {
+      currentQuestionIndex++;
+      loadQuestion();
+    });
 
-      </div>
-    </div>
+    // =========================================================================
+    // 7. 網頁初始化載入
+    // =========================================================================
+    document.addEventListener('DOMContentLoaded', () => {
+      try {
+        initMemoryCards();
+      } catch (e) {
+        console.error("記憶卡初始化發生錯誤：", e);
+      }
+    });
 
-    <!-- 比較表 -->
-    <div class="bg-white rounded-3xl shadow-xl p-8 mb-10 overflow-x-auto">
-      <h2 class="text-3xl font-bold text-center mb-6 text-slate-800">
-        動物細胞 vs 植物細胞
-      </h2>
-
-      <table class="w-full text-center border-collapse overflow-hidden rounded-2xl">
-        <thead>
-          <tr class="bg-slate-200">
-            <th class="p-4 text-lg">構造</th>
-            <th class="p-4 text-lg">動物細胞</th>
-            <th class="p-4 text-lg">植物細胞</th>
-          </tr>
-        </thead>
-
-        <tbody>
-          <tr class="border-b hover:bg-slate-50">
-            <td class="p-4 font-bold">細胞膜</td>
-            <td>⭕</td>
-            <td>⭕</td>
-          </tr>
-
-          <tr class="border-b hover:bg-slate-50">
-            <td class="p-4 font-bold">細胞壁</td>
-            <td>❌</td>
-            <td>⭕</td>
-          </tr>
-
-          <tr class="border-b hover:bg-slate-50">
-            <td class="p-4 font-bold">葉綠體</td>
-            <td>❌</td>
-            <td>⭕</td>
-          </tr>
-
-          <tr class="border-b hover:bg-slate-50">
-            <td class="p-4 font-bold">液胞</td>
-            <td>小或沒有</td>
-            <td>大且明顯</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <!-- 口訣 -->
-    <div class="bg-gradient-to-r from-green-400 to-emerald-500 rounded-3xl shadow-xl p-8 text-white text-center">
-      <h2 class="text-4xl font-bold mb-6">
-        快速記憶口訣
-      </h2>
-
-      <div class="grid md:grid-cols-2 gap-6">
-
-        <div class="bg-white/20 rounded-2xl p-6 backdrop-blur-sm">
-          <h3 class="text-2xl font-bold mb-4">植物細胞特有</h3>
-          <p class="text-4xl font-bold mb-2">壁、葉、液</p>
-          <p>細胞壁、葉綠體、液胞</p>
-        </div>
-
-        <div class="bg-white/20 rounded-2xl p-6 backdrop-blur-sm">
-          <h3 class="text-2xl font-bold mb-4">細胞核功能</h3>
-          <p class="text-4xl font-bold mb-2">核管控制與遺傳</p>
-          <p>控制細胞活動、儲存DNA</p>
-        </div>
-
-      </div>
-    </div>
-
-  </div>
-
+  </script>
 </body>
 </html>
